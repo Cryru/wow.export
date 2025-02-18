@@ -17,6 +17,7 @@ const MTLWriter = require('../writers/MTLWriter');
 const JSONWriter = require('../writers/JSONWriter');
 const GLTFWriter = require('../writers/GLTFWriter');
 const GeosetMapper = require('../GeosetMapper');
+const ShaderMapper = require("../ShaderMapper");
 const ExportHelper = require('../../casc/export-helper');
 const BufferWrapper = require('../../buffer');
 
@@ -332,7 +333,19 @@ class M2Exporter {
 				console.log("Setting meshIndex " + mI + " to " + matName);
 			}
 
-			gltf.addMesh(GeosetMapper.getGeosetName(mI, mesh.submeshID), indices, matName);
+			let materialIndex = texUnit.materialIndex
+			let material = this.m2.materials[materialIndex]
+
+			let extras = {
+				"VS": ShaderMapper.getVertexShader(texUnit.textureCount, texUnit.shaderID), 
+				"PS": ShaderMapper.getPixelShader(texUnit.textureCount, texUnit.shaderID),
+				"DS": ShaderMapper.getDomainShader(texUnit.textureCount, texUnit.shaderID),
+				"HS": ShaderMapper.getHullShader(texUnit.textureCount, texUnit.shaderID),
+				"MaterialFlags": material.flags,
+				"Blending": material.blendingMode
+			};
+
+			gltf.addMesh(GeosetMapper.getGeosetName(mI, mesh.submeshID), indices, matName, extras);
 		}
 
 		await gltf.write(core.view.config.overwriteFiles);

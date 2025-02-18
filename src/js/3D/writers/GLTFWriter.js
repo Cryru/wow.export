@@ -156,9 +156,10 @@ class GLTFWriter {
 	 * @param {string} name 
 	 * @param {Array} triangles
 	 * @param {string} matName 
+	 * @param {object} extras Shaders used and other wow model specific information.
 	 */
-	addMesh(name, triangles, matName) {
-		this.meshes.push({ name, triangles, matName });
+	addMesh(name, triangles, matName, extras) {
+		this.meshes.push({ name, triangles, matName, extras });
 	}
 
 	async write(overwrite = true) {
@@ -1012,6 +1013,7 @@ class GLTFWriter {
 			}
 
 			const meshIndex = root.meshes.length;
+			const extras = mesh.extras;
 			root.meshes.push({
 				primitives: [
 					{
@@ -1020,7 +1022,8 @@ class GLTFWriter {
 						mode: GLTF_TRIANGLES,
 						material: materialMap.get(mesh.matName)
 					}
-				]
+				],
+				extras: extras
 			});
 
 			const node = { name: `${this.name}_${mesh.name}`, mesh: meshIndex };
